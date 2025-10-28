@@ -5,7 +5,6 @@
 int main(int argc,char **argv){
 
     int rank,size;
-    int tag = 100;
 
     MPI_Init(&argc,&argv);
 
@@ -21,18 +20,19 @@ int main(int argc,char **argv){
         justa = fopen("justa.txt","w");
 
         for(int i = 0;i<size*100;i++){
-            MPI_Recv(&valor_recebido,1,MPI_INT,MPI_ANY_SOURCE,tag,MPI_COMM_WORLD,&status);
+            MPI_Recv(&valor_recebido,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
             int mensageiro = status.MPI_SOURCE;
             fprintf(justa,"valor enviado = %d, do processo %d\n",valor_recebido,mensageiro);
         }
     }else{
         for(int i = 0;i<100;i++){
             int mensagem = rank+i;
-            MPI_Send(&mensagem,1,MPI_INT,0,tag,MPI_COMM_WORLD);
+            MPI_Send(&mensagem,1,MPI_INT,0,MPI_ANY_TAG,MPI_COMM_WORLD);
         }
     }
 
     MPI_Finalize();
 
     return 0;
+
 }
