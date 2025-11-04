@@ -14,7 +14,13 @@ int main(int argc,char **argv){
     int size,rank;
     int tag = 100;
     int tam = atoi(argv[1]);
+    int trocas = atoi(argv[2]);
     double times[2];
+
+    if(argc != 3){
+        printf("quantidade de argumentos invalida");
+        return 1;
+    }
   
     MPI_Init(&argc,&argv);
 
@@ -30,28 +36,48 @@ int main(int argc,char **argv){
         exit(1);
     }else{
         if(rank == 0){
-            double *vetor_enviado;
-            vetor_enviado = (double *)malloc(tam*sizeof(double));
+            double *vetor_procs1;
+            vetor_procs1 = (double *)malloc(tam*sizeof(double));
             for(int i = 0;i<tam;i++){
-                vetor_enviado[i] = -1.0;
+                vetor_procs1[i] = -1.0;
             }
+         
+            MPI_Status status;
 
-            iterarVetor(2.0,vetor_enviado,tam);
+            iterarVetor(2.0,vetor_procs1,tam);
 
-            MPI_Send(vetor_enviado,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD);
+            MPI_Send(vetor_procs1,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD);   
+          
+           // for(int i=0;i<trocas;i++){
+           //     MPI_Recv(vetor_procs1,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD,&status);
+           //     iterarVetor(2.0,vetor_procs1,tam);
+           //     MPI_Send(vetor_procs1,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD);
+           // }
+
+            free(vetor_procs1);
 
         }else if(rank == 1){
-            double *vetor_recebido;
+            double *vetor_procs2;
             MPI_Status status;
-            vetor_recebido = (double*)malloc(tam*sizeof(double));
+            vetor_procs2 = (double*)malloc(tam*sizeof(double));
             for(int i = 0;i<tam;i++){
-                vetor_recebido[i] = -1.0;
+                vetor_procs2[i] = -1.0;
             }
-            MPI_Recv(vetor_recebido,tam,MPI_DOUBLE,0,tag,MPI_COMM_WORLD,&status);
+  
+            MPI_Recv(vetor_procs2,tam,MPI_DOUBLE,0,tag,MPI_COMM_WORLD,&status);
 
-            iterarVetor(4.0,vetor_recebido,tam);
-
-            free(vetor_recebido);
+            iterarVetor(4.0,vetor_procs2,tam);
+ 
+           // MPI_Send(vetor_procs2,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD);
+            
+            //for(int i=0;i<trocas;i++){
+                //MPI_Recv(vetor_procs2,tam,MPI_DOUBLE,0,tag,MPI_COMM_WORLD,&status);
+               // iterarVetor(4.0,vetor_procs2,tam);
+              //  if(i < trocas-1){
+             //      MPI_Send(vetor_procs2,tam,MPI_DOUBLE,1,tag,MPI_COMM_WORLD);
+            //    }
+           // }
+          //  free(vetor_procs2);
         }
     }
 
@@ -64,7 +90,7 @@ int main(int argc,char **argv){
     MPI_Finalize();
 
    if(rank == 1){
-      printf("tempo total : %f segundos",times[0]+times[1]);
+      printf("tempo total : %f segundos\n",times[0]+times[1]);
    }
 
     return 0;
