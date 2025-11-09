@@ -21,11 +21,8 @@ int main(int argc,char **argv){
     int tag = 100;
     int tam = atoi(argv[1]);
     int trocas = atoi(argv[2]);
-    double times[2];
   
     MPI_Init(&argc,&argv);
-
-    double start_time = MPI_Wtime();
 
     MPI_Comm_size(MPI_COMM_WORLD,&size);
 
@@ -71,3 +68,4 @@ int main(int argc,char **argv){
 
     return 0;
 }
+
