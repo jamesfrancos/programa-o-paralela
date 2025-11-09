@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 #include <mpi.h>
 
 int main(int argc,char **argv){
@@ -35,13 +36,7 @@ int main(int argc,char **argv){
             return 1;
         }
     }
-
-    clock_t inicio, fim;
-    double tempo_execucao;
-
-    // Inicia a medição do tempo
-    inicio = clock();
-    
+   
     // Inicializa matriz
     //printf("Matrix (%dx%d):\n", rows, cols);
 
@@ -66,35 +61,92 @@ int main(int argc,char **argv){
     MPI_Comm_size(MPI_COMM_WORLD,&size);
     
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+    int *vetValoresLocais;
+    vetValoresLocais = (int*)malloc(6*sizeof(int));
+    for(int i=0;i<6;i++){
+        vetValoresLocais[i] = 1;
+    }
+    vetValoresLocais[3] = INT_MAX;
+    int inicio = rank*(rows/size);
+    int fim = (rank+1)*(rows/size);
     
     if(rank == 0){
-         int *vet_max;
-         int *vet_min;
-         int *vet_max_col;
-         int *vet_max_row;
-         int *vet_min_col;
-         int *vet_min_row;
-         vet_max = (int*)malloc(size*sizeof(int));
-         vet_min = (int*)malloc(size*sizeof(int));
-         vet_max_col = (int*)malloc(size*sizeof(int));
-         vet_max_row = (int*)malloc(size*sizeof(int));
-         vet_min_col = (int*)malloc(size*sizeof(int));
-         vet_min_row = (int*)malloc(size*sizeof(int));
+         MPI_Status status;
+
+         double inicio = MPI_Wtime();
+
+         for(int i = inicio;i<fim;i++){
+            for(int j = 0;j<cols;j++){
+                if (matrix[i][j] > maxVal || matrix[i][j] < minVal)
+                {
+                    if (matrix[i][j] < minVal){
+                        minVal = matrix[i][j];
+                        minrow = i;
+                        mincol = j;
+                    }
+                    else if (matrix[i][j] > maxVal){
+                        maxVal = matrix[i][j];
+                        maxrow = i;
+                        maxcol = j; 
+                    }
+                }
+            }
+           }
 
          for(int i = 1;i<size;i++){
-             
+             MPI_Recv(vetValoresLocais,6,MPI_INT,i,tag,MPI_COMM_WORLD,&status);
+             if(vetValoresLocais[0] > maxVal || vetValoresLocais[3] < minVal){
+                    if(vetValoresLocais[0] > maxVal){
+                        maxVal = vetValoresLocais[0];
+                        maxrow = vetValoresLocais[1];
+                        maxcol = vetValoresLocais[2];
+                    }
+                    else if(vetValoresLocais[3] < minVal){
+                        minVal = vetValoresLocais[3];
+                        minrow = vetValoresLocais[4];
+                        mincol = vetValoresLocais[5];
+                    }
+             }
          }
+
+         double fim = MPI_Wtime();
+
+         double tempo_total = fim - inicio / CLOCKS_PER_SEC;
+
+         printf("\n O valor máximo é: %d em (%d,%d) e o mínimo é: %d em (%d, %d)\n", maxVal, maxrow, maxcol, minVal, minrow, mincol);
+         printf("Tempo de execucao: %f segundos\n", tempo_total); 
+         
     }else{
-         int maxValLocal = matrix[0][0];
-         int minValLocal = matrix[0][0];
-         int maxrowLocal,maxcolLocal,minrowLocal,mincolLocal;
-         int inicio = rank*(row/size);
-         int fim
-        
          for(int i = inicio;i<fim;i++){
-            for(int j = 0;j<col;j++){
-            
+            for(int j = 0;j<cols;j++){
+                if (matrix[i][j] > vetValoresLocais[0] || matrix[i][j] < vetValoresLocais[3])
+                {
+                    if (matrix[i][j] < vetValoresLocais[3]){
+                        vetValoresLocais[3] = matrix[i][j];
+                        vetValoresLocais[4] = i;
+                        vetValoresLocais[5] = j;
+                    }
+                    else if (matrix[i][j] > vetValoresLocais[0]){
+                        vetValoresLocais[0] = matrix[i][j];
+                        vetValoresLocais[1] = i;
+                        vetValoresLocais[2] = j;
+                    }
+                }
             }
          }
+
+         MPI_Send(vetValoresLocais,6,MPI_INT,0,tag,MPI_COMM_WORLD);
     }
+    free(vetValoresLocais);
+
+    MPI_Finalize();
+
+    // Libera a memória alocada
+    for (int i = 0; i < rows; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+
+    return 0;
 }
