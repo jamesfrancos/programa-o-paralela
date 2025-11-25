@@ -35,9 +35,6 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
-
-    clock_t inicio, fim;
-    double tempo_execucao;
     
     // Inicializa matriz
     //printf("Matrix (%dx%d):\n", rows, cols);
@@ -50,7 +47,7 @@ int main(int argc, char *argv[]) {
         //printf("\n");
      }
 
-    inicio = clock();
+    double inicio = omp_get_wtime();
 
     // Encontra o valor máximo e mínimo e suas posições na matriz
     int maxVal = matrix[0][0];
@@ -98,10 +95,10 @@ int main(int argc, char *argv[]) {
 
     
     // Finaliza a medição do tempo
-    fim = clock();
+    double fim = omp_get_wtime();
 
     // Calcula o tempo de execução em segundos
-    tempo_execucao = (double)(fim - inicio) / CLOCKS_PER_SEC;
+    double tempo_execucao = fim - inicio;
    
 
     printf("\n O valor máximo é: %d em (%d,%d) e o mínimo é: %d em (%d, %d)\n", maxVal, maxrow, maxcol, minVal, minrow, mincol);
