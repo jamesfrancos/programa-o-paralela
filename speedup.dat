@@ -1,6 +1,6 @@
 tamanho da matriz: 15.000 x 15.000
 
-tempos(número de processos) em segundos:
+tempos(número de processos) em segundos MPI:
 
 n = 1 : 
   - 0.666641
@@ -49,6 +49,57 @@ speedup de (n = 1) em relação a (n = 2)  = 1,694203862
 speedup de (n = 1) em relação a (n = 4)  = 3,139678209
 
 speedup de (n = 2) em relação a (n = 4) = 1,853187966
+
+
+tempos(número de processos) em segundos OPENMP:
+
+n = 1:
+  - 0.664458
+  - 0.664568
+  - 0.664157
+  - 0.664328
+  - 0.664734
+  - 0.664307
+  - 0.664453
+  - 0.664459
+  - 0.674018
+  - 0.666921
+
+  média = 0,6656403s
+
+n = 2:
+  - 0.335509
+  - 0.335555
+  - 0.336801
+  - 0.336396
+  - 0.335535
+  - 0.335494
+  - 0.335604
+  - 0.335718
+  - 0.335431
+  - 0.336955
+
+  média = 0,3358998s
+
+n = 4:
+  - 0.178874
+  - 0.180369
+  - 0.178413
+  - 0.178845
+  - 0.178995
+  - 0.178593
+  - 0.178560
+  - 0.178696
+  - 0.182622
+  - 0.180766
+
+  média = 0,1794733s
+
+speedup de (n = 1) em relação a (n = 2)  = 1,981663282
+
+speedup de (n = 1) em relação a (n = 4)  = 3,708854186
+
+speedup de (n = 2) em relação a (n = 4) = 1,87158647
   
 
 
